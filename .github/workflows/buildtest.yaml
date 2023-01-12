@@ -3,7 +3,6 @@ name: CI/CD
 on:
   push:
     branches: [ master ]
-    types: [ opened, reopened ]
   
 env:
   COMPILER: "clang++"

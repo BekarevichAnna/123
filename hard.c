@@ -2,7 +2,11 @@
 #include<stdlib.h>
 #include <omp.h>
 #include <string.h>
-#include <sys\timeb.h> 
+#ifdef _WIN32
+    #include <sys\timeb.h> 
+#else 
+    #include <sys/time.h> 
+#endif
 typedef unsigned char byte;
 
 #ifndef OMP_FOR_MODE
@@ -25,6 +29,9 @@ int thread_count;
 
 void read_image(char * path){
     FILE * file = fopen(path, "rb");
+    if(file == NULL){
+
+    }
     fscanf(file, "P5\n%d %d\n255\n", &width, &height);
     n = ((long long)width) * height;
     image = (byte*)malloc(sizeof(byte) * n);
@@ -176,8 +183,18 @@ int main(int argc, char ** argv){
     }
     read_image(argv[2]);
     double start;
-    struct timeb start_t, end_t;
-    ftime(&start_t);
+
+    #ifdef _WIN32
+        struct timeb start_t, end_t;
+        ftime(&start_t);
+        
+
+    #else
+        struct timeval t1, t2;
+        double elapsedTime;
+        gettimeofday(&t1, NULL);
+    #endif
+
     #ifdef _OPENMP
         start = omp_get_wtime();
     #endif
@@ -185,12 +202,19 @@ int main(int argc, char ** argv){
     calculate_f();
     
     convert_image();
-    ftime(&end_t);
+    
     #ifdef _OPENMP
         printf("%d %d %d %g\n", f0, f1, f2, (omp_get_wtime() - start) * 1000);
     #else
-        double diff =  (1000.0 * (end_t.time - start_t.time)+ (end_t.millitm - start_t.millitm));
-        printf("%d %d %d %lf\n", f0, f1, f2, diff);
+        #ifdef _WIN32
+            ftime(&end_t);
+            double diff =  (1000.0 * (end_t.time - start_t.time)+ (end_t.millitm - start_t.millitm));
+            printf("%d %d %d %lf\n", f0, f1, f2, diff);
+        #else
+            gettimeofday(&t2, NULL);
+            elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;
+            printf("%d %d %d %lf\n", f0, f1, f2, elapsedTime);
+        #endif
         //printf("Time: %g ms\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - startChrono).count());
     #endif
     for(int i = 0; i < 256;i++){

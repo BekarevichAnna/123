@@ -30,7 +30,7 @@ int thread_count;
 void read_image(char * path){
     FILE * file = fopen(path, "rb");
     if(file == NULL){
-
+        printf("error opening file!\n");
     }
     fscanf(file, "P5\n%d %d\n255\n", &width, &height);
     n = ((long long)width) * height;
@@ -41,6 +41,9 @@ void read_image(char * path){
 
 void write_image(char * path){
     FILE * file = fopen(path, "wb");
+    if(file == NULL){
+        printf("error opening file!\n");
+    }
     fprintf(file, "P5\n%d %d\n255\n", width, height);
     fwrite(image, sizeof(byte), n, file);
     free(image);
@@ -215,7 +218,6 @@ int main(int argc, char ** argv){
             elapsedTime = (t2.tv_sec - t1.tv_sec) * 1000.0;
             printf("%d %d %d %lf\n", f0, f1, f2, elapsedTime);
         #endif
-        //printf("Time: %g ms\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - startChrono).count());
     #endif
     for(int i = 0; i < 256;i++){
         free(histogram_calc[i]);

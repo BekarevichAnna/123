@@ -1,8 +1,8 @@
 name: CI/CD
 
 on:
-  pull_request:
-    branches: [ feedback ]
+  push:
+    branches: [ master ]
     types: [ opened, reopened ]
   
 env:
